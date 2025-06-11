@@ -8,4 +8,6 @@ urlpatterns = [
     path('', views.main, name='main'),
     path('api/stock/<int:stock_id>/price/', views.get_stock_price, name='get_stock_price'),
     path('api/stock/<int:stock_id>/trade/', views.trade_stock, name='trade_stock'),
+    path('api/stock/<int:stock_id>/account/', views.get_account_info, name='get_account_info'),
+
 ]

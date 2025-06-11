@@ -5,24 +5,35 @@
     <meta charset="UTF-8">
     <title>{{ stock.name }} 시뮬레이터</title>
     <link rel="stylesheet" href="{% static 'simulator/css/stock_main.css' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <script>
         const stockId = "{{ stock.id }}";
         const initialPrice = "{{ stock.price }}";
+        const balance = "{{ balance }}";
+        const quantity = "{{ quantity }}";
     </script>
     <script src="{% static 'simulator/js/stock_main.js' %}" defer></script>
 </head>
 <body>
     <div id="game-container">
-        <h1>{{ stock.name }} 시뮬레이터</h1>
-        <div id="stock-price">현재 가격: {{ stock.price }}₩</div>
-
-        <div id="trading">
-            <button onclick="buyStock()">매수</button>
-            <button onclick="sellStock()">매도</button>
+        <fieldset>
+            <div class="information">
+                <div id="stock-price">현재 가격: ${{ stock.price }}</div>
+            </div>
+        </fieldset>
+        <div id="stock-window"></div>
+        <div class="windows">
+            <fieldset id="trading">
+                <div id="trading-button">
+                    <button id="buy-button">매수</button>
+                    <button id="sell-button">매도</button>
+                </div>
+                <div class="information">
+                    <div id="balance">잔고: ${{ balance }}</div>
+                    <div id="shares">보유 주식: {{ quantity }}</div>
+                </div>
+            </fieldset>
         </div>
-
-        <div id="balance">잔고: {{ balance }}₩</div>
-        <div id="shares">보유 주식: {{ quantity }}주</div>
     </div>
 </body>
 </html>

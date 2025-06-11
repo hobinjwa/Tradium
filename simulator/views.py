@@ -77,3 +77,15 @@ def trade_stock(request, stock_id):
             return JsonResponse({'success': False, 'error': '보유 주식 부족'})
 
     return JsonResponse({'success': False, 'error': '잘못된 요청'})
+
+@require_GET
+@login_required
+def get_account_info(request, stock_id):
+    stock = get_object_or_404(Stock, id=stock_id)
+    account, _ = Account.objects.get_or_create(user=request.user)
+    portfolio, _ = Portfolio.objects.get_or_create(user=request.user, stock=stock)
+    
+    return JsonResponse({
+        'balance': account.balance,
+        'quantity': portfolio.quantity
+    })
