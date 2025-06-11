@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>유저 정보</title>
+</head>
+<body>
+    <h1>{{ request.user.username }}님의 정보</h1>
+
+    <ul>
+        {% for p in portfolios %}
+            <li>
+                <a href="{% url 'stock_detail' p.stock.id %}">
+                    {{ p.stock.name }}
+                </a> - {{ p.quantity }}주 보유
+            </li>
+        {% empty %}
+            <li>보유한 주식이 없습니다.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

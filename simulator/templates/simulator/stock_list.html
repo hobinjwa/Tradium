@@ -6,11 +6,16 @@
 <body>
     <h1>주식 목록</h1>
     <ul>
-        {% for stock in stocks %}
-            <li>{{ stock.name }} - {{ stock.current_price }}₩</li>
-        {% empty %}
-            <li>등록된 주식이 없습니다.</li>
-        {% endfor %}
-    </ul>
+    {% for stock in stocks %}
+        <li>
+            <a href="{% url 'stock_main' stock.id %}">
+                {{ stock.name }} - {{ stock.price }}₩
+            </a>
+        </li>
+    {% empty %}
+        <li>등록된 주식이 없습니다.</li>
+    {% endfor %}
+</ul>
+
 </body>
 </html>
