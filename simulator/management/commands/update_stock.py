@@ -23,10 +23,10 @@ class Command(BaseCommand):
 
             self.stdout.write(f"{stock.name}: {stock.price:.2f}원")
 
-            # 히스토리 20개 유지 (오래된거 삭제)
+            # 히스토리 60개 유지 (오래된거 삭제)
             histories = StockHistory.objects.filter(stock=stock).order_by('-timestamp')
-            if histories.count() > 20:
-                for h in histories[20:]:
+            if histories.count() > 60:
+                for h in histories[60:]:
                     h.delete()
 
         self.stdout.write(self.style.SUCCESS('주식 가격 갱신,저장 완료'))

@@ -45,7 +45,6 @@ fetch(`/api/stock/${stockId}/history/`)
             let oldPrice = price;
             price = item.price;
             const change = price - oldPrice;
-            variance = (change / price) * 100;
 
             if (change > 0) {
                 createBlock('red', true, change);
@@ -66,6 +65,7 @@ setInterval(() => {
 
 function updateGraph(newPrice) {
     const change = newPrice - price;
+    if (change === 0) return;
     price = newPrice;
     variance = (change / price) * 100;
 

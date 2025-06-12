@@ -40,7 +40,7 @@ def get_stock_price(request, stock_id):
 @login_required
 def get_stock_history(request, stock_id):
     stock = get_object_or_404(Stock, id=stock_id)
-    history = StockHistory.objects.filter(stock=stock).order_by('-timestamp')[:20]
+    history = StockHistory.objects.filter(stock=stock).order_by('-timestamp')[:60]
     data = [{'price': h.price, 'timestamp': h.timestamp.isoformat()} for h in reversed(history)]
     return JsonResponse({'history': data})
 
