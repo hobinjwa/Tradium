@@ -14,6 +14,56 @@ let lastTop = 200;
 let to_right = 0;
 let variance = 0;
 
+// 팝업 관련 요소
+const inputWindow = document.getElementById('input-window');
+const inputWindowClose = document.getElementById('input-window-close');
+const tradingTitle = document.getElementById('trading-title');
+const availableAmount = document.getElementById('available-amount');
+const ownedShares = document.getElementById('owned-shares');
+const inputAmount = document.getElementById('input-amount');
+const decreaseQuantity = document.getElementById('decrease-quantity');
+const increaseQuantity = document.getElementById('increase-quantity');
+const quantityInput = document.getElementById('quantity-input');
+const quantitySlider = document.getElementById('quantity-slider');
+const sliderDisplay = document.getElementById('slider-display');
+const confirm = document.getElementById('confirm');
+const cancel = document.getElementById('cancel');
+const noticeWindow = document.getElementById('notice-window');
+const noticeWindowClose = document.getElementById('notice-window-close');
+const noticeTitle = document.getElementById('notice-title');
+const noticeContent = document.getElementById('notice-content');
+const noticeConfirm = document.getElementById('notice-confirm');
+
+let inputQuantity = 0;
+let buttonType;
+
+// 처음 입장시 기존 히스토리 가져오기
+fetch(`/api/stock/${stockId}/history/`)
+    .then(res => res.json())
+    .then(data => {
+        for (let item of data.history) {
+            let oldPrice = price;
+            price = item.price;
+            const change = price - oldPrice;
+            variance = (change / price) * 100;
+
+            if (change > 0) {
+                createBlock('red', true, change);
+            } else {
+                createBlock('blue', false, change);
+            }
+        }
+    });
+
+// 실시간 가격 갱신
+setInterval(() => {
+    fetch(`/api/stock/${stockId}/price/`)
+        .then(res => res.json())
+        .then(data => {
+            updateGraph(data.price);
+        });
+}, 1000);
+
 function updateGraph(newPrice) {
     const change = newPrice - price;
     price = newPrice;
@@ -68,51 +118,90 @@ function adjustBlocks() {
     }
 }
 
-setInterval(() => {
-    fetch(`/api/stock/${stockId}/price/`)
-        .then(res => res.json())
-        .then(data => {
-            updateGraph(data.price);
-        });
-}, 1000);
-
+// 거래 팝업창
 buyButton.addEventListener('click', () => {
-    const quantity = parseInt(prompt("몇 주 매수할까요?"));
-    if (isNaN(quantity) || quantity <= 0) {
-        alert("올바른 수량을 입력하세요");
-        return;
-    }
-    trade('buy', quantity);
+    buttonType = "매수";
+    openInputWindow();
 });
 
 sellButton.addEventListener('click', () => {
-    const quantity = parseInt(prompt("몇 주 매도할까요?"));
-    if (isNaN(quantity) || quantity <= 0) {
-        alert("올바른 수량을 입력하세요");
-        return;
-    }
-    trade('sell', quantity);
+    buttonType = "매도";
+    openInputWindow();
 });
 
-function trade(action, quantity) {
+function openInputWindow() {
+    inputWindow.style.display = "block";
+    tradingTitle.innerText = buttonType;
+    availableAmount.innerText = `${userBalance.toFixed(2)}원`;
+    ownedShares.innerText = `${userShares}주`;
+    inputAmount.innerText = `${buttonType} 금액: ${(price * inputQuantity).toFixed(2)}원`;
+    inputQuantity = 0;
+    quantityInput.value = inputQuantity;
+    quantitySlider.value = 0;
+    sliderDisplay.innerText = "0%";
+}
+
+inputWindowClose.addEventListener('click', () => inputWindow.style.display = "none");
+cancel.addEventListener('click', () => inputWindow.style.display = "none");
+
+decreaseQuantity.addEventListener('click', () => {
+    if (inputQuantity > 0) inputQuantity--;
+    checkLimit(); updateInput();
+});
+
+increaseQuantity.addEventListener('click', () => {
+    inputQuantity++;
+    checkLimit(); updateInput();
+});
+
+quantityInput.addEventListener('input', () => {
+    inputQuantity = parseInt(quantityInput.value) || 0;
+    checkLimit(); updateInput();
+});
+
+quantitySlider.addEventListener('input', () => {
+    const percentage = quantitySlider.value;
+    sliderDisplay.innerText = `${percentage}%`;
+    if (buttonType === '매수') {
+        inputQuantity = Math.floor((userBalance / price) * (percentage / 100));
+    } else {
+        inputQuantity = Math.floor(userShares * (percentage / 100));
+    }
+    checkLimit(); updateInput();
+});
+
+function checkLimit() {
+    if (buttonType === '매수' && inputQuantity * price > userBalance)
+        inputQuantity = Math.floor(userBalance / price);
+    if (buttonType === '매도' && inputQuantity > userShares)
+        inputQuantity = userShares;
+}
+
+function updateInput() {
+    quantityInput.value = inputQuantity;
+    inputAmount.innerText = `${buttonType} 금액: ${(price * inputQuantity).toFixed(2)}원`;
+}
+
+confirm.addEventListener('click', () => {
     fetch(`/api/stock/${stockId}/trade/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': getCSRFToken()
         },
-        body: `action=${action}&quantity=${quantity}`
+        body: `action=${buttonType === '매수' ? 'buy' : 'sell'}&quantity=${inputQuantity}`
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert(`${action === 'buy' ? '매수' : '매도'} 성공`);
+            inputWindow.style.display = "none";
             refreshAccount();
+            openNotice("거래 성공", "거래가 완료되었습니다");
         } else {
-            alert(data.error);
+            openNotice("거래 실패", data.error);
         }
     });
-}
+});
 
 function refreshAccount() {
     fetch(`/api/stock/${stockId}/account/`)
@@ -125,7 +214,15 @@ function refreshAccount() {
         });
 }
 
+function openNotice(title, content) {
+    noticeWindow.style.display = "block";
+    noticeTitle.innerText = title;
+    noticeContent.innerText = content;
+}
+
+noticeWindowClose.addEventListener('click', () => noticeWindow.style.display = "none");
+noticeConfirm.addEventListener('click', () => noticeWindow.style.display = "none");
+
 function getCSRFToken() {
-    const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
-    return cookie ? cookie.split('=')[1] : '';
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }

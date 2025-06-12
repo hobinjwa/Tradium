@@ -39,3 +39,10 @@ class Transaction(models.Model):
         action = "매수" if self.quantity > 0 else "매도"
         return f'{self.user.username} {action} {abs(self.quantity)}주 {self.stock.name} @{self.transaction_price}₩'
 
+class StockHistory(models.Model):
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    price = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.stock.name} 기록: {self.price}₩ ({self.timestamp})'

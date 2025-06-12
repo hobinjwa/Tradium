@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST
-from .models import Stock, Portfolio, Account,Transaction
+from .models import Stock, Portfolio, Account,Transaction,StockHistory
 
 def stock_list(request):
     stocks = Stock.objects.all()
@@ -35,6 +35,14 @@ def main(request):
 def get_stock_price(request, stock_id):
     stock = get_object_or_404(Stock, id=stock_id)
     return JsonResponse({'price': stock.price})
+
+@require_GET
+@login_required
+def get_stock_history(request, stock_id):
+    stock = get_object_or_404(Stock, id=stock_id)
+    history = StockHistory.objects.filter(stock=stock).order_by('-timestamp')[:20]
+    data = [{'price': h.price, 'timestamp': h.timestamp.isoformat()} for h in reversed(history)]
+    return JsonResponse({'history': data})
 
 # 거래 (매수/매도)
 @require_POST

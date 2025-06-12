@@ -15,25 +15,61 @@
     <script src="{% static 'simulator/js/stock_main.js' %}" defer></script>
 </head>
 <body>
-    <div id="game-container">
-        <fieldset>
+<div id="game-container">
+    <fieldset>
+        <div class="information">
+            <div id="stock-price">현재 가격: ${{ stock.price }}</div>
+        </div>
+    </fieldset>
+
+    <div id="stock-window"></div>
+
+    <div class="windows">
+        <fieldset id="trading">
+            <div id="trading-button">
+                <button id="buy-button">매수</button>
+                <button id="sell-button">매도</button>
+            </div>
             <div class="information">
-                <div id="stock-price">현재 가격: ${{ stock.price }}</div>
+                <div id="balance">잔고: ${{ balance }}</div>
+                <div id="shares">보유 주식: {{ quantity }}</div>
             </div>
         </fieldset>
-        <div id="stock-window"></div>
-        <div class="windows">
-            <fieldset id="trading">
-                <div id="trading-button">
-                    <button id="buy-button">매수</button>
-                    <button id="sell-button">매도</button>
-                </div>
-                <div class="information">
-                    <div id="balance">잔고: ${{ balance }}</div>
-                    <div id="shares">보유 주식: {{ quantity }}</div>
-                </div>
-            </fieldset>
+    </div>
+
+    <!-- 팝업 입력창 -->
+    <div id="input-window">
+        <div id="input-window-content">
+            <div class="close" id="input-window-close">×</div>
+            <h2 id="trading-title">매수</h2>
+            <div>매수 가능한 금액: <span id="available-amount">0</span></div>
+            <div>보유 주식: <span id="owned-shares">0</span></div>
+            <div><span id="input-amount">매수 금액: 0</span></div>
+            <div class="quantity-control">
+                <button id="decrease-quantity">-</button>
+                <input type="number" id="quantity-input" value="0">
+                <button id="increase-quantity">+</button>
+            </div>
+            <div>
+                <input type="range" id="quantity-slider">
+                <span id="slider-display">0%</span>
+            </div>
+            <div class="input-option">
+                <button id="confirm" class="option">확인</button>
+                <button id="cancel" class="option">취소</button>
+            </div>
         </div>
     </div>
+
+    <!-- 알림창 -->
+    <div id="notice-window">
+        <div id="notice-window-content">
+            <div class="close" id="notice-window-close">×</div>
+            <h2 id="notice-title">알림</h2>
+            <div id="notice-content">알림 내용</div>
+            <button id="notice-confirm" class="option">확인</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
