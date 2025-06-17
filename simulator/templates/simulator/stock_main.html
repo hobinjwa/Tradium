@@ -23,7 +23,11 @@
         </div>
     </fieldset>
     <div id="hover-price">가격: </div>
-    <div id="stock-window"></div>
+    <div id="stock-window">
+        <div id="zoom">
+        <button id="zoom-in">확대</button>
+        <button id="zoom-out">축소</button>
+      </div></div>
 
     <div class="windows">
         <fieldset id="trading">
@@ -31,10 +35,6 @@
                 <button id="buy-button">매수</button>
                 <button id="sell-button">매도</button>
             </div>
-            <div id="zoom-controls">
-                <button id="zoom-in">확대</button>
-                <button id="zoom-out">축소</button>
-              </div>
             <div class="information">
                 <div id="balance">잔고: ${{ balance }}</div>
                 <div id="shares">보유 주식: {{ quantity }}</div>
