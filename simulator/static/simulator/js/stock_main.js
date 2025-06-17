@@ -105,32 +105,29 @@ function createBlock(color, isUp, height) {
 
   // hover 이벤트 추가
   block.addEventListener("mouseenter", () => {
+
     hoverBox.style.display = "block";
-    
+
     const index = blocks.indexOf(block);
     let openPrice = (index > 0) ? blocks[index - 1].dataset.price : block.dataset.price;
 
     hoverBox.innerText = `Open: $${openPrice}\nClose: $${block.dataset.price}`;
 
     block.addEventListener("mousemove", (e) => {
-        hoverBox.style.left = e.pageX + 15 + "px";
-        hoverBox.style.top = e.pageY - 20 + "px";
+        hoverBox.style.left = e.pageX + 10 + "px";
+        hoverBox.style.top = e.pageY - 80 + "px";
     });
 
-    block.style.filter = "brightness(1.4)";
+    block.style.transform = "scale(1.1)";
+    block.style.opacity = "0.7";
 });
 
 block.addEventListener("mouseleave", () => {
     hoverBox.style.display = "none";
-    block.style.filter = "brightness(1)";
+    block.style.transform = "scale(1)";
+    block.style.opacity = "1";
 });
 
-
-
-  block.addEventListener("mouseleave", () => {
-    hoverBox.style.display = "none";
-    block.style.filter = "brightness(1)";
-  });
 
   stock_window.appendChild(block);
   blocks.push(block);
@@ -252,7 +249,7 @@ confirm.addEventListener("click", () => {
     .then((data) => {
       if (data.success) {
         inputWindow.style.display = "flex";
-        refreshAccount();
+        reloadAccount();
         openNotice("거래 성공", "거래가 완료되었습니다");
       } else {
         openNotice("거래 실패", data.error);
@@ -260,7 +257,7 @@ confirm.addEventListener("click", () => {
     });
 });
 
-function refreshAccount() {
+function reloadAccount() {
   fetch(`/api/stock/${stockId}/account/`)
     .then((res) => res.json())
     .then((data) => {
