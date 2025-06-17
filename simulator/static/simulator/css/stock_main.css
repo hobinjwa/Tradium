@@ -264,7 +264,7 @@ fieldset {
   position: absolute;
   width: 10px;
   height: 30px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 .red-block {
   background-color: red;

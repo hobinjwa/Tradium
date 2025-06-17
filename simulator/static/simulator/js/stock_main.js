@@ -4,6 +4,9 @@ const buyButton = document.getElementById("buy-button");
 const sellButton = document.getElementById("sell-button");
 const balanceElement = document.getElementById("balance");
 const sharesElement = document.getElementById("shares");
+const hoverBox = document.getElementById("hover-price");
+const zoomIn = document.getElementById("zoom-in");
+const zoomOut = document.getElementById("zoom-out");
 
 let price = parseFloat(initialPrice);
 let userBalance = parseFloat(balance);
@@ -14,6 +17,7 @@ let lastTop = 200;
 let to_right = 0;
 let variance = 0;
 
+let scaleFactor = 1;
 // 팝업 관련 요소
 const inputWindow = document.getElementById("input-window");
 const inputWindowClose = document.getElementById("input-window-close");
@@ -33,7 +37,6 @@ const noticeWindowClose = document.getElementById("notice-window-close");
 const noticeTitle = document.getElementById("notice-title");
 const noticeContent = document.getElementById("notice-content");
 const noticeConfirm = document.getElementById("notice-confirm");
-const hoverBox = document.getElementById("hover-price");
 
 let inputQuantity = 0;
 let buttonType;
@@ -102,7 +105,10 @@ function createBlock(color, isUp, height) {
   block.style.left = `${to_right}px`;
 
     block.dataset.price = price.toFixed(2); // 블록마다 가격 저장
-
+    block.dataset.originalLeft = to_right;  // 원본 좌표 저장
+    block.dataset.originalWidth = 8;        // 원본 폭 저장
+    block.dataset.originalTop = lastTop;
+    block.dataset.originalHeight = height;
   // hover 이벤트 추가
   block.addEventListener("mouseenter", () => {
 
@@ -155,6 +161,29 @@ function adjustBlocks() {
     to_right -= 8;
   }
 }
+
+function rescaleBlocks() {
+  blocks.forEach(block => {
+    const originalLeft = parseFloat(block.dataset.originalLeft);
+    const originalWidth = parseFloat(block.dataset.originalWidth);
+    const originalTop = parseFloat(block.dataset.originalTop);
+    const originalHeight = parseFloat(block.dataset.originalHeight);
+
+    block.style.left = `${originalLeft * scaleFactor}px`;
+    block.style.width = `${originalWidth * scaleFactor}px`;
+    block.style.top = `${originalTop * scaleFactor}px`;
+    block.style.height = `${originalHeight * scaleFactor}px`;
+  });
+}
+zoomIn.addEventListener("click", () => {
+  scaleFactor *= 1.2;
+  rescaleBlocks();
+});
+
+zoomOut.addEventListener("click", () => {
+  scaleFactor /= 1.2;
+  rescaleBlocks();
+});
 
 // 거래 팝업창
 buyButton.addEventListener("click", () => {
