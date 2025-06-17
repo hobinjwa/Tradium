@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>랭킹</title>
+</head>
+<body>
+    <h1>사용자 랭킹</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>순위</th>
+                <th>유저명</th>
+                <th>총 자산</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in ranking %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.total_assets }}원</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

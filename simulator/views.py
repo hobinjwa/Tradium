@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST
 from .models import Stock, Portfolio, Account,Transaction,StockHistory
+from django.contrib.auth.models import User
 
 def stock_list(request):
     stocks = Stock.objects.all()
@@ -97,3 +98,24 @@ def get_account_info(request, stock_id):
         'balance': account.balance,
         'quantity': portfolio.quantity
     })
+
+def TotalBalance(user):
+    account, _ = Account.objects.get_or_create(user=user)
+    portfolios = Portfolio.objects.filter(user=user)
+    stock_balance = sum([p.stock.price * p.quantity for p in portfolios])
+    total_balance = account.balance + stock_balance
+    return round(total_balance, 2)
+
+@login_required
+def ranking_view(request):
+    users = User.objects.all()
+    ranking = []
+
+    for user in users:
+        total_balance = TotalBalance(user)
+        ranking.append({'username': user.username, 'total_balance': total_balance})
+
+    # 자산 내림차순 정렬
+    ranking.sort(key=lambda x: x['total_balance'], reverse=True)
+
+    return render(request, 'simulator/ranking.html', {'ranking': ranking})

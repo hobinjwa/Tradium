@@ -138,7 +138,7 @@ sellButton.addEventListener("click", () => {
 });
 
 function openInputWindow() {
-  inputWindow.style.visibility = "visible";
+  inputWindow.style.display = "flex";
   tradingTitle.innerText = buttonType;
   availableAmount.innerText = `${userBalance.toFixed(2)}원`;
   ownedShares.innerText = `${userShares}주`;
@@ -153,11 +153,11 @@ function openInputWindow() {
 
 inputWindowClose.addEventListener(
   "click",
-  () => (inputWindow.style.visibility = "hidden")
+  () => (inputWindow.style.display = "none")
 );
 cancel.addEventListener(
   "click",
-  () => (inputWindow.style.visibility = "hidden")
+  () => (inputWindow.style.display = "none")
 );
 
 decreaseQuantity.addEventListener("click", () => {
@@ -218,7 +218,7 @@ confirm.addEventListener("click", () => {
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
-        inputWindow.style.visibility = "hidden";
+        inputWindow.style.display = "flex";
         refreshAccount();
         openNotice("거래 성공", "거래가 완료되었습니다");
       } else {

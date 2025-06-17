@@ -121,14 +121,13 @@ fieldset {
 
 /* Modal Style */
 #input-window {
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
   position: fixed;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.4);
-  visibility: hidden;
 }
 
 #input-window-content {

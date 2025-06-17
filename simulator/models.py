@@ -46,3 +46,4 @@ class StockHistory(models.Model):
 
     def __str__(self):
         return f'{self.stock.name} 기록: {self.price}₩ ({self.timestamp})'
+
