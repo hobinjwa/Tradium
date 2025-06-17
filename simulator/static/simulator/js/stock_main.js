@@ -33,6 +33,7 @@ const noticeWindowClose = document.getElementById("notice-window-close");
 const noticeTitle = document.getElementById("notice-title");
 const noticeContent = document.getElementById("notice-content");
 const noticeConfirm = document.getElementById("notice-confirm");
+const hoverBox = document.getElementById("hover-price");
 
 let inputQuantity = 0;
 let buttonType;
@@ -99,6 +100,38 @@ function createBlock(color, isUp, height) {
   block.style.top = `${lastTop}px`;
   block.style.height = `${height}px`;
   block.style.left = `${to_right}px`;
+
+    block.dataset.price = price.toFixed(2); // 블록마다 가격 저장
+
+  // hover 이벤트 추가
+  block.addEventListener("mouseenter", () => {
+    hoverBox.style.display = "block";
+    
+    const index = blocks.indexOf(block);
+    let openPrice = (index > 0) ? blocks[index - 1].dataset.price : block.dataset.price;
+
+    hoverBox.innerText = `Open: $${openPrice}\nClose: $${block.dataset.price}`;
+
+    block.addEventListener("mousemove", (e) => {
+        hoverBox.style.left = e.pageX + 15 + "px";
+        hoverBox.style.top = e.pageY - 20 + "px";
+    });
+
+    block.style.filter = "brightness(1.4)";
+});
+
+block.addEventListener("mouseleave", () => {
+    hoverBox.style.display = "none";
+    block.style.filter = "brightness(1)";
+});
+
+
+
+  block.addEventListener("mouseleave", () => {
+    hoverBox.style.display = "none";
+    block.style.filter = "brightness(1)";
+  });
+
   stock_window.appendChild(block);
   blocks.push(block);
 
