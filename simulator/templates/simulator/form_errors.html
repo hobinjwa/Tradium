@@ -1,0 +1,15 @@
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="form-errors">
+                <strong>{{ field.label }} 항목에서 문제가 발생했습니다:</strong>
+                {{ error }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <div class="form-errors">
+            <strong>입력 오류:</strong> {{ error }}
+        </div>
+    {% endfor %}
+{% endif %}

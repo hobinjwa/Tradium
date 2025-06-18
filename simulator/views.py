@@ -4,6 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST
 from .models import Stock, Portfolio, Account,Transaction,StockHistory
 from django.contrib.auth.models import User
+from .forms import SignUpForm
+from django.shortcuts import redirect
+
 
 def stock_list(request):
     stocks = Stock.objects.all()
@@ -119,3 +122,15 @@ def ranking_view(request):
     ranking.sort(key=lambda x: x['total_balance'], reverse=True)
 
     return render(request, 'simulator/ranking.html', {'ranking': ranking})
+
+
+
+def signup(request):
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('Tradium:login')  # 가입 후 로그인 페이지로 이동
+    else:
+        form = SignUpForm()
+    return render(request, 'simulator/signup.html', {'form': form})

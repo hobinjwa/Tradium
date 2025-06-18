@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>회원가입</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 2.5rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      width: 360px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+    input {
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      border: 1.8px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 2rem;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button:hover {
+      background-color: #357abd;
+    }
+    .form-errors {
+      color: #b00000;
+      background: #ffe0e0;
+      border: 1px solid #ff6b6b;
+      border-radius: 6px;
+      padding: 0.6rem;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>회원가입</h2>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="form-errors">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <div><strong>{{ field.label }}:</strong> {{ error }}</div>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {{ form.username.label_tag }}
+      {{ form.username }}
+      
+      {{ form.email.label_tag }}
+      {{ form.email }}
+      
+      {{ form.password1.label_tag }}
+      {{ form.password1 }}
+      
+      {{ form.password2.label_tag }}
+      {{ form.password2 }}
+      
+      <button type="submit">가입하기</button>
+    </form>
+  </div>
+</body>
+</html>
