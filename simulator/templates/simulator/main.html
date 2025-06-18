@@ -1,23 +1,38 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>주식 시뮬레이터 - 메인</title>
+    <link rel="stylesheet" href="{% static 'simulator/css/main.css' %}">
 </head>
 <body>
-    <h1>안녕하세요, {{ user.username }}님</h1>
-    <p>현재 잔고: ₩{{ balance }}</p>
+    <div class="container">
+        <header>
+            <h1>안녕하세요, {{ user.username }}님</h1>
+            <p>현재 잔고: ₩{{ balance }}</p>
+            <p><a href="{% url 'portfolio' user.id %}">포트폴리오 보기</a> | <a href="{% url 'ranking' %}">랭킹 보기</a></p>
+        </header>
 
-    <h2>주식 목록</h2>
-    <ul>
-        {% for stock in stocks %}
-        <li>
-            <a href="{% url 'stock_main' stock.id %}">
-                {{ stock.name }} - 현재가 ₩{{ stock.price }}
-            </a>
-        </li>
-        {% empty %}
-        <li>등록된 주식이 없습니다.</li>
-        {% endfor %}
-    </ul>
+        <section class="stock-section">
+            <h2>주식 목록</h2>
+            <ul class="stock-list">
+                {% for stock in stocks %}
+                <li class="stock-item">
+                    <a href="{% url 'stock_main' stock.id %}">
+                        <strong>{{ stock.name }}</strong> - 현재가 ₩{{ stock.price }}
+                    </a>
+                    <span class="owning">보유: 
+                        {% for p in user.portfolio_set.all %}
+                            {% if p.stock.id == stock.id %}{{ p.quantity }}주{% endif %}
+                        {% endfor %}
+                    </span>
+                </li>
+                {% empty %}
+                <li>등록된 주식이 없습니다.</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
 </body>
 </html>

@@ -1,12 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>랭킹</title>
+    <title>사용자 랭킹</title>
+    <link rel="stylesheet" href="{% static 'simulator/css/ranking.css' %}">
 </head>
 <body>
-    <h1>사용자 랭킹</h1>
-    <table border="1">
+    <h1>📈 사용자 랭킹</h1>
+
+    <table>
         <thead>
             <tr>
                 <th>순위</th>
@@ -15,14 +18,22 @@
             </tr>
         </thead>
         <tbody>
-            {% for user in ranking %}
+            {% for i in ranking %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.total_assets }}원</td>
+                <td>
+                    <a href="{% url 'portfolio' i.user.id %}">
+                        {{ i.user.username }}
+                    </a>
+                </td>
+                <td>
+                    <span class="tooltip" data-tooltip="잔고: {{ i.balance|floatformat:2 }}₩, 주식: {{ i.stock_value|floatformat:2 }}₩">
+                        {{ i.total_balance|floatformat:2 }}₩
+                    </span>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+
+    <p style="margin-top: 40px;"

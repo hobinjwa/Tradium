@@ -17,11 +17,45 @@ def stock_main(request, stock_id):
     return render(request, 'simulator/stock_main.html', {'stock': stock , 'balance': account.balance, 'quantity': portfolio.quantity})
 
 
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+
 @login_required
-def portfolio_view(request):
-    user = request.user
-    portfolios = Portfolio.objects.filter(user=user)
-    return render(request, 'simulator/portfolio.html', {'portfolios': portfolios})
+def portfolio(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+    is_self = (request.user.id == target_user.id)
+
+    portfolios = Portfolio.objects.filter(user=target_user)
+    transactions = Transaction.objects.filter(user=target_user).order_by('-timestamp')
+
+    portfolio_data = []
+    for p in portfolios:
+        if p.quantity == 0:
+            continue
+
+        buys = Transaction.objects.filter(user=target_user, stock=p.stock, quantity__gt=0)
+        total_quantity = sum(t.quantity for t in buys)
+        total_cost = sum(t.quantity * t.transaction_price for t in buys)
+
+        avg_price = (total_cost / total_quantity) if total_quantity > 0 else 0
+        profit_rate = ((p.stock.price - avg_price) / avg_price * 100) if avg_price > 0 else 0
+
+        portfolio_data.append({
+            'stock': p.stock,
+            'quantity': p.quantity,
+            'avg_price': round(avg_price, 2),
+            'current_price': round(p.stock.price, 2),
+            'profit_rate': round(profit_rate, 2),
+        })
+
+    return render(request, 'simulator/portfolio.html', {
+        'target_user': target_user,
+        'is_self': is_self,
+        'portfolio_data': portfolio_data,
+        'transactions': transactions,
+    })
+
+
 
 @login_required
 def main(request):
@@ -113,27 +147,22 @@ def ranking_view(request):
     ranking = []
 
     for user in users:
-        total_balance = TotalBalance(user)
-        ranking.append({'username': user.username, 'total_balance': total_balance})
+        account, _ = Account.objects.get_or_create(user=user)
+        portfolios = Portfolio.objects.filter(user=user)
+        stock_value = sum([p.stock.price * p.quantity for p in portfolios])
+        total_balance = round(account.balance + stock_value, 2)
 
-    # 자산 내림차순 정렬
+        ranking.append({
+            'user': user,
+            'balance': round(account.balance, 2),
+            'stock_value': round(stock_value, 2),
+            'total_balance': total_balance,
+        })
+
     ranking.sort(key=lambda x: x['total_balance'], reverse=True)
 
     return render(request, 'simulator/ranking.html', {'ranking': ranking})
 
-def trade_history(request, stock_id):
-    trades = Transaction.objects.filter(stock_id=stock_id).order_by('-id')[:50]
-
-    result = []
-    for trade in trades:
-        result.append({
-            "user": trade.user.username,
-            "type": "buy" if trade.quantity > 0 else "sell",
-            "price": float(trade.transaction_price),
-            "quantity": abs(trade.quantity),
-        })
-
-    return JsonResponse({"trades": result})
 
 
 

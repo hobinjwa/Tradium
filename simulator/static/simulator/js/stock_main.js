@@ -7,6 +7,9 @@ const sharesElement = document.getElementById("shares");
 const hoverBox = document.getElementById("hover-price");
 const zoomIn = document.getElementById("zoom-in");
 const zoomOut = document.getElementById("zoom-out");
+const zoom = document.getElementById("zoom");
+
+
 
 let price = parseFloat(initialPrice);
 let userBalance = parseFloat(balance);
@@ -67,13 +70,6 @@ setInterval(() => {
     });
 }, 5000);
 
-setInterval(() => {
-  fetch(`/api/stock/${stockId}/trades/`)
-    .then(res => res.json())
-    .then(data => {
-      publicTrades = data.trades;
-    });
-}, 5000);
 
 function updateGraph(newPrice) {
   const change = newPrice - price;
@@ -118,19 +114,6 @@ function createBlock(color, isUp, height) {
     block.style.transform = "scale(1.1)";
     block.style.opacity = "0.5";
 
-    publicTrades.forEach(trade => {
-      const key = `${trade.user}-${trade.price}-${trade.quantity}-${trade.type}`;
-      if (!shownTrades.has(key) && Math.abs(trade.price - price) < 0.01) {
-        const dot = document.createElement("div");
-        dot.className = "trade-dot";
-        dot.style.backgroundColor = trade.type === "buy" ? "#66bb6a" : "#ef5350";
-        dot.title = `${trade.user} ${trade.type === "buy" ? "매수" : "매도"} ${trade.quantity}주`;
-        dot.style.left = block.style.left;
-        dot.style.top = `${parseFloat(block.style.top) - 10}px`;
-        stock_window.appendChild(dot);
-        shownTrades.add(key);
-      }
-    });
   });
 
   block.addEventListener("mouseleave", () => {
@@ -159,15 +142,24 @@ function adjustBlocks() {
 
   stock_window.scrollTo(blocks[blocks.length-1].offsetLeft, 0);
 }
+function positionZoom() {
+  const rect = stock_window.getBoundingClientRect();  
+  zoom.style.top = `${rect.bottom-65}px`;
+  zoom.style.left = `${rect.right-120}px`; // 버튼 너비 고려
+}
+window.addEventListener("resize", positionZoom);
+window.addEventListener("load", positionZoom);
 
 zoomIn.addEventListener("click", () => {
   scaleFactor *= 1.2;
   adjustBlocks();
+  positionZoom();
 });
 
 zoomOut.addEventListener("click", () => {
   scaleFactor /= 1.2;
   adjustBlocks();
+  positionZoom();
 });
 
 // 거래 관련 코드 동일하게 유지
