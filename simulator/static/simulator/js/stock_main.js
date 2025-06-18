@@ -14,11 +14,11 @@ let userShares = parseInt(quantity);
 
 const blocks = [];
 let lastTop = 200;
-let to_right = 0;
-let variance = 0;
-
 let scaleFactor = 1;
-// 팝업 관련 요소
+
+let publicTrades = [];
+const shownTrades = new Set();
+
 const inputWindow = document.getElementById("input-window");
 const inputWindowClose = document.getElementById("input-window-close");
 const tradingTitle = document.getElementById("trading-title");
@@ -41,7 +41,7 @@ const noticeConfirm = document.getElementById("notice-confirm");
 let inputQuantity = 0;
 let buttonType;
 
-// 처음 입장시 기존 히스토리 가져오기
+// 최초 히스토리 불러오기
 fetch(`/api/stock/${stockId}/history/`)
   .then((res) => res.json())
   .then((data) => {
@@ -56,22 +56,30 @@ fetch(`/api/stock/${stockId}/history/`)
         createBlock("blue", false, change);
       }
     }
+    adjustBlocks();
   });
 
-// 실시간 가격 갱신
 setInterval(() => {
   fetch(`/api/stock/${stockId}/price/`)
     .then((res) => res.json())
     .then((data) => {
       updateGraph(data.price);
     });
-}, 1000);
+}, 5000);
+
+setInterval(() => {
+  fetch(`/api/stock/${stockId}/trades/`)
+    .then(res => res.json())
+    .then(data => {
+      publicTrades = data.trades;
+    });
+}, 5000);
 
 function updateGraph(newPrice) {
   const change = newPrice - price;
   if (change === 0) return;
   price = newPrice;
-  variance = (change / price) * 100;
+  const variance = (change / price) * 100;
 
   if (change > 0) {
     createBlock("red", true, change);
@@ -81,111 +89,88 @@ function updateGraph(newPrice) {
 
   adjustBlocks();
 
-  if (variance > 0) {
-    stockPrice.innerHTML = `현재 가격: $${price.toFixed(
-      2
-    )} <span style="color: red;">+${variance.toFixed(2)}%</span>`;
-  } else {
-    stockPrice.innerHTML = `현재 가격: $${price.toFixed(
-      2
-    )} <span style="color: blue;">${variance.toFixed(2)}%</span>`;
-  }
+  stockPrice.innerHTML = `현재 가격: $${price.toFixed(2)} <span style="color: ${variance > 0 ? 'red' : 'blue'};">${variance.toFixed(2)}%</span>`;
 }
 
 function createBlock(color, isUp, height) {
   const block = document.createElement("div");
   block.className = `block ${color}-block`;
-  block.style.width = "8px";
+  const width = 8;
   height = Math.abs(height);
 
   if (isUp) lastTop -= height;
+  const top = lastTop;
 
-  block.style.top = `${lastTop}px`;
-  block.style.height = `${height}px`;
-  block.style.left = `${to_right}px`;
+  block.dataset.price = price.toFixed(2);
+  block.dataset.originalTop = top;
+  block.dataset.originalHeight = height;
+  block.dataset.originalWidth = width;
 
-    block.dataset.price = price.toFixed(2); // 블록마다 가격 저장
-    block.dataset.originalLeft = to_right;  // 원본 좌표 저장
-    block.dataset.originalWidth = 8;        // 원본 폭 저장
-    block.dataset.originalTop = lastTop;
-    block.dataset.originalHeight = height;
-  // hover 이벤트 추가
   block.addEventListener("mouseenter", () => {
-
     hoverBox.style.display = "block";
-
     const index = blocks.indexOf(block);
-    let openPrice = (index > 0) ? blocks[index - 1].dataset.price : block.dataset.price;
-
+    const openPrice = index > 0 ? blocks[index - 1].dataset.price : block.dataset.price;
     hoverBox.innerText = `Open: $${openPrice}\nClose: $${block.dataset.price}`;
-
     block.addEventListener("mousemove", (e) => {
-        hoverBox.style.left = e.pageX + 10 + "px";
-        hoverBox.style.top = e.pageY - 80 + "px";
+      hoverBox.style.left = e.pageX + 10 + "px";
+      hoverBox.style.top = e.pageY - 80 + "px";
     });
-
     block.style.transform = "scale(1.1)";
-    block.style.opacity = "0.7";
-});
+    block.style.opacity = "0.5";
 
-block.addEventListener("mouseleave", () => {
+    publicTrades.forEach(trade => {
+      const key = `${trade.user}-${trade.price}-${trade.quantity}-${trade.type}`;
+      if (!shownTrades.has(key) && Math.abs(trade.price - price) < 0.01) {
+        const dot = document.createElement("div");
+        dot.className = "trade-dot";
+        dot.style.backgroundColor = trade.type === "buy" ? "#66bb6a" : "#ef5350";
+        dot.title = `${trade.user} ${trade.type === "buy" ? "매수" : "매도"} ${trade.quantity}주`;
+        dot.style.left = block.style.left;
+        dot.style.top = `${parseFloat(block.style.top) - 10}px`;
+        stock_window.appendChild(dot);
+        shownTrades.add(key);
+      }
+    });
+  });
+
+  block.addEventListener("mouseleave", () => {
     hoverBox.style.display = "none";
     block.style.transform = "scale(1)";
     block.style.opacity = "1";
-});
-
+  });
 
   stock_window.appendChild(block);
   blocks.push(block);
 
   if (!isUp) lastTop += height;
-
-  if (to_right > 400) {
-    adjustBlocks();
-  } else {
-    to_right += 8;
-  }
 }
 
 function adjustBlocks() {
-  const offset = 200 - parseInt(blocks[blocks.length - 1].style.top);
-  blocks.forEach(
-    (block) => (block.style.top = `${parseInt(block.style.top) + offset}px`)
-  );
-  lastTop += offset;
+  blocks.forEach((block, index) => {
+    const top = parseFloat(block.dataset.originalTop);
+    const height = parseFloat(block.dataset.originalHeight);
+    const width = parseFloat(block.dataset.originalWidth);
 
-  if (to_right > 400) {
-    blocks.forEach(
-      (block) => (block.style.left = `${parseInt(block.style.left) - 8}px`)
-    );
-    to_right -= 8;
-  }
-}
-
-function rescaleBlocks() {
-  blocks.forEach(block => {
-    const originalLeft = parseFloat(block.dataset.originalLeft);
-    const originalWidth = parseFloat(block.dataset.originalWidth);
-    const originalTop = parseFloat(block.dataset.originalTop);
-    const originalHeight = parseFloat(block.dataset.originalHeight);
-
-    block.style.left = `${originalLeft * scaleFactor}px`;
-    block.style.width = `${originalWidth * scaleFactor}px`;
-    block.style.top = `${originalTop * scaleFactor}px`;
-    block.style.height = `${originalHeight * scaleFactor}px`;
+    block.style.left = `${index * width * scaleFactor}px`;
+    block.style.width = `${width * scaleFactor}px`;
+    block.style.top = `${top * scaleFactor}px`;
+    block.style.height = `${height * scaleFactor}px`;
   });
+
+  stock_window.scrollTo(blocks[blocks.length-1].offsetLeft, 0);
 }
+
 zoomIn.addEventListener("click", () => {
   scaleFactor *= 1.2;
-  rescaleBlocks();
+  adjustBlocks();
 });
 
 zoomOut.addEventListener("click", () => {
   scaleFactor /= 1.2;
-  rescaleBlocks();
+  adjustBlocks();
 });
 
-// 거래 팝업창
+// 거래 관련 코드 동일하게 유지
 buyButton.addEventListener("click", () => {
   buttonType = "매수";
   openInputWindow();
@@ -201,23 +186,15 @@ function openInputWindow() {
   tradingTitle.innerText = buttonType;
   availableAmount.innerText = `${userBalance.toFixed(2)}원`;
   ownedShares.innerText = `${userShares}주`;
-  inputAmount.innerText = `${buttonType} 금액: ${(
-    price * inputQuantity
-  ).toFixed(2)}원`;
+  inputAmount.innerText = `${buttonType} 금액: ${(price * inputQuantity).toFixed(2)}원`;
   inputQuantity = 0;
   quantityInput.value = inputQuantity;
   quantitySlider.value = 0;
   sliderDisplay.innerText = "0%";
 }
 
-inputWindowClose.addEventListener(
-  "click",
-  () => (inputWindow.style.display = "none")
-);
-cancel.addEventListener(
-  "click",
-  () => (inputWindow.style.display = "none")
-);
+inputWindowClose.addEventListener("click", () => inputWindow.style.display = "none");
+cancel.addEventListener("click", () => inputWindow.style.display = "none");
 
 decreaseQuantity.addEventListener("click", () => {
   if (inputQuantity > 0) inputQuantity--;
@@ -240,11 +217,9 @@ quantityInput.addEventListener("input", () => {
 quantitySlider.addEventListener("input", () => {
   const percentage = quantitySlider.value;
   sliderDisplay.innerText = `${percentage}%`;
-  if (buttonType === "매수") {
-    inputQuantity = Math.floor((userBalance / price) * (percentage / 100));
-  } else {
-    inputQuantity = Math.floor(userShares * (percentage / 100));
-  }
+  inputQuantity = buttonType === "매수"
+    ? Math.floor((userBalance / price) * (percentage / 100))
+    : Math.floor(userShares * (percentage / 100));
   checkLimit();
   updateInput();
 });
@@ -258,9 +233,7 @@ function checkLimit() {
 
 function updateInput() {
   quantityInput.value = inputQuantity;
-  inputAmount.innerText = `${buttonType} 금액: ${(
-    price * inputQuantity
-  ).toFixed(2)}원`;
+  inputAmount.innerText = `${buttonType} 금액: ${(price * inputQuantity).toFixed(2)}원`;
 }
 
 confirm.addEventListener("click", () => {
@@ -270,12 +243,10 @@ confirm.addEventListener("click", () => {
       "Content-Type": "application/x-www-form-urlencoded",
       "X-CSRFToken": getCSRFToken(),
     },
-    body: `action=${
-      buttonType === "매수" ? "buy" : "sell"
-    }&quantity=${inputQuantity}`,
+    body: `action=${buttonType === "매수" ? "buy" : "sell"}&quantity=${inputQuantity}`,
   })
-    .then((res) => res.json())
-    .then((data) => {
+    .then(res => res.json())
+    .then(data => {
       if (data.success) {
         inputWindow.style.display = "flex";
         reloadAccount();
@@ -288,8 +259,8 @@ confirm.addEventListener("click", () => {
 
 function reloadAccount() {
   fetch(`/api/stock/${stockId}/account/`)
-    .then((res) => res.json())
-    .then((data) => {
+    .then(res => res.json())
+    .then(data => {
       userBalance = data.balance;
       userShares = data.quantity;
       balanceElement.innerText = `잔고: $${userBalance.toFixed(2)}`;
@@ -298,22 +269,14 @@ function reloadAccount() {
 }
 
 function openNotice(title, content) {
-  noticeWindow.style.display = "block";
+  noticeWindow.style.display = "flex";
   noticeTitle.innerText = title;
   noticeContent.innerText = content;
 }
 
-noticeWindowClose.addEventListener(
-  "click",
-  () => (noticeWindow.style.display = "none")
-);
-noticeConfirm.addEventListener(
-  "click",
-  () => (noticeWindow.style.display = "none")
-);
+noticeWindowClose.addEventListener("click", () => noticeWindow.style.display = "none");
+noticeConfirm.addEventListener("click", () => noticeWindow.style.display = "none");
 
 function getCSRFToken() {
-  return document
-    .querySelector('meta[name="csrf-token"]')
-    .getAttribute("content");
+  return document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 }

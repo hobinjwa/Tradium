@@ -119,3 +119,18 @@ def ranking_view(request):
     ranking.sort(key=lambda x: x['total_balance'], reverse=True)
 
     return render(request, 'simulator/ranking.html', {'ranking': ranking})
+
+def trade_history(request, stock_id):
+    trades = Transaction.objects.filter(stock_id=stock_id).order_by('-id')[:50]
+
+    result = []
+    for trade in trades:
+        result.append({
+            "user": trade.user.username,
+            "type": "buy" if trade.quantity > 0 else "sell",
+            "price": float(trade.transaction_price),
+            "quantity": abs(trade.quantity),
+        })
+
+    return JsonResponse({"trades": result})
+
