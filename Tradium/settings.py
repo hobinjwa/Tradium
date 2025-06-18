@@ -27,11 +27,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#로그인아웃
+LOGIN_REDIRECT_URL = "/testapp/login/"
+LOGOUT_REDIRECT_URL = "/testapp/login/"
+
 
 # Application definition
 
 INSTALLED_APPS = [
     'simulator',
+    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -105,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 

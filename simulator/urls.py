@@ -1,6 +1,6 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
-
+app_name = 'simulator'
 urlpatterns = [
     path('stocks/', views.stock_list, name='stock_list'),
     path('stocks/<int:stock_id>/', views.stock_main, name='stock_main'),

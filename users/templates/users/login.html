@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>로그인</title>
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      padding: 2.5rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      width: 360px;
+      text-align: center;
+    }
+
+    .greeting {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    a.logout-link {
+      display: inline-block;
+      margin-top: 0.3rem;
+      color: #e74c3c;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease-in-out;
+    }
+    a.logout-link:hover {
+      color: #c0392b;
+    }
+
+    .status-guest {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      color: #777;
+    }
+
+    form {
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.5rem 0.7rem;
+      margin-bottom: 1.2rem;
+      border: 1.8px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #4a90e2;
+      outline: none;
+      box-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #357abd;
+    }
+
+    /* form_errors.html 포함 부분 스타일 예시 */
+    .form-errors {
+      background: #ffe0e0;
+      border: 1px solid #ff6b6b;
+      color: #b00000;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .signup-link {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .signup-link a {
+      color: #4a90e2;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .signup-link a:hover {
+      color: #357abd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    {% if user.is_authenticated %}
+      <div class="greeting">{{ user.username }} 님, 반갑습니다.</div>
+      <a href="{% url 'users:logout' %}" class="logout-link">{{ user.username }} 님 (로그아웃)</a>
+    {% else %}
+      <div class="status-guest">현재 상태 : Guest</div>
+      <form method="post" action="{% url 'users:login' %}">
+        {% csrf_token %}
+        {% include "simulator/form_errors.html" %}
+        
+        <label for="username">사용자ID</label>
+        <input
+          type="text"
+          name="username"
+          id="username"
+          value="{{ form.username.value | default_if_none:'' }}"
+          autocomplete="username"
+          required
+          autofocus
+        />
+
+        <label for="password">비밀번호</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          value="{{ form.password.value | default_if_none:'' }}"
+          autocomplete="current-password"
+          required
+        />
+
+        <button type="submit">로그인</button>
+      </form>
+
+      <div class="signup-link">
+        <a href="{% url 'users:signup' %}">아직 회원이 아니신가요? 회원가입</a>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

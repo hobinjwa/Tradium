@@ -5,6 +5,7 @@ from django.views.decorators.http import require_GET, require_POST
 from .models import Stock, Portfolio, Account,Transaction,StockHistory
 from django.contrib.auth.models import User
 
+
 def stock_list(request):
     stocks = Stock.objects.all()
     return render(request, 'simulator/stock_list.html', {'stocks': stocks})
@@ -133,4 +134,7 @@ def trade_history(request, stock_id):
         })
 
     return JsonResponse({"trades": result})
+
+
+
 
