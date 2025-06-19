@@ -5,7 +5,7 @@ from simulator.models import Stock, StockHistory
 import random
 
 class Command(BaseCommand):
-    help = '주식 가격을 랜덤으로 갱신하고 히스토리 저장'
+    help = '주식 가격을 갱신'
 
     def handle(self, *args, **kwargs):
         for stock in Stock.objects.all():
@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
             self.stdout.write(f"{stock.name}: {stock.price:.2f}원")
 
-            # 히스토리 60개 유지 (오래된거 삭제)
+            # 히스토리 60개 유지 
             histories = StockHistory.objects.filter(stock=stock).order_by('-timestamp')
             if histories.count() > 60:
                 for h in histories[60:]:

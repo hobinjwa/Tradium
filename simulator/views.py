@@ -108,7 +108,7 @@ def trade_stock(request, stock_id):
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'error': '잔액 부족'})
-    
+        
     elif action == 'sell':
         portfolio = get_object_or_404(Portfolio, user=request.user, stock=stock)
         if portfolio.quantity >= quantity:
@@ -122,7 +122,7 @@ def trade_stock(request, stock_id):
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'error': '보유 주식 부족'})
-
+        
     return JsonResponse({'success': False, 'error': '잘못된 요청'})
 
 @require_GET
@@ -136,13 +136,6 @@ def get_account_info(request, stock_id):
         'balance': account.balance,
         'quantity': portfolio.quantity
     })
-
-def TotalBalance(user):
-    account, _ = Account.objects.get_or_create(user=user)
-    portfolios = Portfolio.objects.filter(user=user)
-    stock_balance = sum([p.stock.price * p.quantity for p in portfolios])
-    total_balance = account.balance + stock_balance
-    return round(total_balance, 2)
 
 @login_required
 def ranking_view(request):
