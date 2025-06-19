@@ -21,6 +21,9 @@
         <div class="information">
             <div id="stock-price">현재 가격: ${{ stock.price }}</div>
         </div>
+        <div class="information">
+            <div id="stock-name">📈 {{ stock.name }}</div>
+        </div>
     </fieldset>
     <div id="hover-price">가격: </div>
     <div id="stock-window"></div>
@@ -37,7 +40,6 @@
             <div class="information">
                 <div id="balance">잔고: ${{ balance }}</div>
                 <div id="shares">보유 주식: {{ quantity }}</div>
-                <div id="profit-box">수익률: +0.00%</div>
             </div>
         </fieldset>
         

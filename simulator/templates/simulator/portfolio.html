@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="{% static 'simulator/css/portfolio.css' %}">
 </head>
 <body>
+    <div style="margin: 15px 0;">
+        <a href="{% url 'main' %}" style="color: #4a90e2; font-weight: bold;">🏠 메인으로</a>
+    </div>
     <h1>{{ request.user.username }}님의 포트폴리오</h1>
 
     <h2>보유 주식</h2>
@@ -54,23 +57,11 @@
         <tbody>
             {% for t in transactions %}
             <tr>
-                <td>{{ t.stock.name }}</td>
-                <td>
-                    {% if t.quantity > 0 %}
-                        매수
-                    {% else %}
-                        매도
-                    {% endif %}
-                </td>
-                <td>
-                    {% if t.quantity < 0 %}
-                        {{ t.quantity|slice:"1:" }}주
-                    {% else %}
-                        {{ t.quantity }}주
-                    {% endif %}
-                </td>
-                <td>{{ t.transaction_price }}₩</td>
-                <td>{{ t.transaction_price|floatformat:2|add:""|floatformat:2 }}₩</td>
+                <td>{{ t.stock_name }}</td>
+                <td>{{ t.action }}</td>
+                <td>{{ t.quantity }}주</td>
+                <td>{{ t.price }}₩</td>
+                <td>{{ t.total }}₩</td>
                 <td>{{ t.timestamp|date:"Y-m-d H:i" }}</td>
             </tr>
             {% empty %}

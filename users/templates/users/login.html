@@ -137,7 +137,7 @@
       <div class="status-guest">현재 상태 : Guest</div>
       <form method="post" action="{% url 'users:login' %}">
         {% csrf_token %}
-        {% include "simulator/form_errors.html" %}
+        {% include "users/form_errors.html" %}
         
         <label for="username">사용자ID</label>
         <input

@@ -5,29 +5,21 @@ from django.views.decorators.http import require_GET, require_POST
 from .models import Stock, Portfolio, Account,Transaction,StockHistory
 from django.contrib.auth.models import User
 
-
-def stock_list(request):
-    stocks = Stock.objects.all()
-    return render(request, 'simulator/stock_list.html', {'stocks': stocks})
-
 def stock_main(request, stock_id):
     stock = get_object_or_404(Stock, id=stock_id)
     account, _= Account.objects.get_or_create(user=request.user)
     portfolio, _ = Portfolio.objects.get_or_create(user=request.user, stock=stock)
-    return render(request, 'simulator/stock_main.html', {'stock': stock , 'balance': account.balance, 'quantity': portfolio.quantity})
+    return render(request, 'simulator/stock_main.html', {'stock': stock , 'balance': round(account.balance,2), 'quantity': portfolio.quantity})
 
-
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
 
 @login_required
 def portfolio(request, user_id):
     target_user = get_object_or_404(User, id=user_id)
-    is_self = (request.user.id == target_user.id)
 
     portfolios = Portfolio.objects.filter(user=target_user)
     transactions = Transaction.objects.filter(user=target_user).order_by('-timestamp')
 
+    # 보유 주식 데이터 구성
     portfolio_data = []
     for p in portfolios:
         if p.quantity == 0:
@@ -48,11 +40,22 @@ def portfolio(request, user_id):
             'profit_rate': round(profit_rate, 2),
         })
 
+    # 거래 내역 데이터 구성 (템플릿에서 바로 출력 가능하도록 가공)
+    transaction_data = []
+    for t in transactions:
+        transaction_data.append({
+            'stock_name': t.stock.name,
+            'action': '매수' if t.quantity > 0 else '매도',
+            'quantity': abs(t.quantity),
+            'price': round(t.transaction_price, 2),
+            'total': round(abs(t.quantity) * t.transaction_price, 2),
+            'timestamp': t.timestamp,  # 가공하지 않고 그대로 넘김
+        })
+
     return render(request, 'simulator/portfolio.html', {
         'target_user': target_user,
-        'is_self': is_self,
         'portfolio_data': portfolio_data,
-        'transactions': transactions,
+        'transactions': transaction_data,
     })
 
 
@@ -63,7 +66,7 @@ def main(request):
     account,created = Account.objects.get_or_create(user=request.user)
     return render(request, 'simulator/main.html', {
         'stocks': stocks,
-        'balance': account.balance,
+        'balance': round(account.balance,2),
     })
 
 @require_GET

@@ -1,7 +1,6 @@
 from django.urls import path, include
 from . import views
 urlpatterns = [
-    path('stocks/', views.stock_list, name='stock_list'),
     path('stocks/<int:stock_id>/', views.stock_main, name='stock_main'),
     path('user/<int:user_id>/portfolio/', views.portfolio, name='portfolio'),
     path('', views.main, name='main'),

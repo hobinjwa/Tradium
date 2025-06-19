@@ -11,7 +11,11 @@
         <header>
             <h1>안녕하세요, {{ user.username }}님</h1>
             <p>현재 잔고: ₩{{ balance }}</p>
-            <p><a href="{% url 'portfolio' user.id %}">포트폴리오 보기</a> | <a href="{% url 'ranking' %}">랭킹 보기</a></p>
+            <p>
+            <a href="{% url 'portfolio' user.id %}">포트폴리오 보기</a> | 
+            <a href="{% url 'ranking' %}">랭킹 보기</a> | 
+            <a href="{% url 'users:logout' %}" style="color: red;">로그아웃</a>
+    </p>
         </header>
 
         <section class="stock-section">
