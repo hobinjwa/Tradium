@@ -9,7 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         for stock in Stock.objects.all():
-            volatility = random.uniform(5, 30)
+            volatility = random.uniform(0.1, 0.6)
             change = random.uniform(-volatility, volatility) / 100
             stock.price *= (1 + change)
             stock.price = round(stock.price, 2)

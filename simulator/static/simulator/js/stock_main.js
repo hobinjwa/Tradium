@@ -87,7 +87,6 @@ function updateGraph(newPrice) {
 
   stockPrice.innerHTML = `현재 가격: $${price.toFixed(2)} <span style="color: ${variance > 0 ? 'red' : 'blue'};">${variance.toFixed(2)}%</span>`;
 }
-
 function createBlock(color, isUp, height) {
   const block = document.createElement("div");
   block.className = `block ${color}-block`;
